@@ -113,26 +113,29 @@ var Player = {
 
 var cashbox = {
   amount: 0,
-  history: [], // сохранять операции над кассой здесь
+  history: [],
+  status: 'closed',
   open: function(incomingCash) {
     if (incomingCash < 0 || typeof incomingCash !== 'number' || Number.isNaN(incomingCash) ||
-      incomingCash === Infinity)
+      incomingCash === Infinity || this.status === 'opened')
       return false;
     this.amount = incomingCash;
+    this.status = 'opened';
   },
   addPayment: function(payment) {
     if (typeof payment !== 'object' || typeof payment.amount !== 'number' || Number.isNaN(
         payment.amount) || payment.amount === Infinity || payment.amount <= 0 || typeof payment
-      .info !== 'string' || payment.info.trim().length === 0) return false;
+      .info !== 'string' || payment.info.trim().length === 0 || this.status === 'closed') return false;
     this.amount += payment.amount;
-    this.history.push({ time: new Date(), info: payment.info.trim(), amount: payment.amount })
+    this.history.push({ time: new Date(), info: payment.info.trim(), amount: payment.amount });
   },
   refundPayment: function(refund) {
     if (typeof refund !== 'object' || typeof refund.amount !== 'number' || Number.isNaN(
         refund.amount) || refund.amount === Infinity || refund.amount <= 0 || typeof refund
-      .info !== 'string' || refund.info.trim().length === 0 || refund.amount > this.amount)
+      .info !== 'string' || refund.info.trim().length === 0 || refund.amount > this.amount ||
+      this.status === 'closed')
       return false;
     this.amount -= refund.amount;
-    this.history.push({ time: new Date(), info: refund.info.trim(), amount: refund.amount })
+    this.history.push({ time: new Date(), info: refund.info.trim(), amount: refund.amount });
   },
 };

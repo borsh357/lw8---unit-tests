@@ -1,3 +1,4 @@
+/* jshint ignore:start */
 mocha.setup('bdd');
 var assert = chai.assert;
 var expect = chai.expect;
@@ -131,17 +132,24 @@ describe('Player', function() {
 describe('Cashbox', function() {
   describe('cashbox.open(incomingCash)', function() {
     it('Принимает аргумент в качестве amount кассы', () => {
-      assert.deepEqual(cashbox.open(1), assert.propertyVal(cashbox, 'amount', 1));
+      assert.deepEqual(cashbox.open(1), assert.propertyVal(cashbox, 'amount', 1),
+        assert.propertyVal(cashbox, 'status', 'opened'));
     });
-    it('Возвращает false, если incomingCash меньше нуля или не является числом', () => {
-      assert.deepEqual(cashbox.open(-1), false);
-      assert.deepEqual(cashbox.open(NaN), false);
-      assert.deepEqual(cashbox.open(Infinity), false);
-      assert.deepEqual(cashbox.open('1'), false);
-      assert.deepEqual(cashbox.open([1]), false);
-      assert.deepEqual(cashbox.open({ amount: 1 }), false);
-      assert.deepEqual(cashbox.open(), false);
-    });
+    console.log(cashbox.status);
+    it(
+      'Возвращает false, если incomingCash меньше нуля или не является числом, если касса уже открыта',
+      () => {
+        assert.deepEqual(cashbox.open(-1), false);
+        assert.deepEqual(cashbox.open(NaN), false);
+        assert.deepEqual(cashbox.open(Infinity), false);
+        assert.deepEqual(cashbox.open('1'), false);
+        assert.deepEqual(cashbox.open([1]), false);
+        assert.deepEqual(cashbox.open({ amount: 1 }), false);
+        assert.deepEqual(cashbox.open(), false);
+        if (cashbox.status === 'opened') {
+          assert.deepEqual(cashbox.open(100), false);
+        }
+      });
   });
 
   describe('cashbox.addPayment()', function() {
@@ -155,26 +163,31 @@ describe('Cashbox', function() {
         expect(cashbox.history[testIndexOfPayment].info).to.be.deep.equal(
           'True Payment'),
         expect(cashbox.history[testIndexOfPayment].amount).to.be.deep.equal(10),
-        expect(cashbox.history[testIndexOfPayment]).to.have.property('time')
+        expect(cashbox.history[testIndexOfPayment]).to.have.property('time'),
+        expect(assert.propertyVal(cashbox, 'status', 'opened'))
       );
     });
     it(
-      'Возвращает false, если payment.ammount меньше или равно нулю, если переданы значения неверного типа, или если аргументы отсутствуют',
+      'Возвращает false, если payment.ammount меньше или равно нулю, если переданы значения неверного типа, аргументы отсутствуют, или касса закрыта',
       () => {
         assert.deepEqual(cashbox.addPayment({ amount: 0, info: 'payment.amount = 0' }),
-          false)
+          false);
         assert.deepEqual(cashbox.addPayment({ amount: '100', info: 'Not a number' }),
-            false),
-          assert.deepEqual(cashbox.addPayment({ amount: [100], info: 'Not a number' }),
-            false),
-          assert.deepEqual(cashbox.addPayment({ amount: {}, info: 'Not a number' }),
-            false),
-          assert.deepEqual(cashbox.addPayment({ info: 'amount is missing' }),
-            false)
+          false);
+        assert.deepEqual(cashbox.addPayment({ amount: [100], info: 'Not a number' }),
+          false);
+        assert.deepEqual(cashbox.addPayment({ amount: {}, info: 'Not a number' }),
+          false);
+        assert.deepEqual(cashbox.addPayment({ info: 'amount is missing' }),
+          false);
         assert.deepEqual(cashbox.addPayment({ amount: 100 }),
-            false),
-          assert.deepEqual(cashbox.addPayment(NaN, 'not an object at all'),
-            false)
+          false);
+        assert.deepEqual(cashbox.addPayment(NaN, 'not an object at all'),
+          false);
+        if (cashbox.status === 'closed') {
+          assert.deepEqual(cashbox.addPayment({ amount: 10, info: 'payment.amount = 0' }),
+            false);
+        }
       });
   });
 
@@ -189,30 +202,36 @@ describe('Cashbox', function() {
         expect(cashbox.history[testIndexOfPayment].info).to.be.deep.equal(
           'True Refund'),
         expect(cashbox.history[testIndexOfPayment].amount).to.be.deep.equal(5),
-        expect(cashbox.history[testIndexOfPayment]).to.have.property('time')
+        expect(cashbox.history[testIndexOfPayment]).to.have.property('time'),
+        expect(assert.propertyVal(cashbox, 'status', 'opened'))
       );
     });
     it(
       'Возвращает false, если refund.ammount меньше или равно нулю или больше refund.ammount, если переданы значения неверного типа, или если аргументы отсутствуют',
       () => {
         assert.deepEqual(cashbox.refundPayment({ amount: 0, info: 'refund.amount = 0' }),
-            false),
-          assert.deepEqual(cashbox.refundPayment({ amount: 100, info: 'cashbox.amount < 100' }),
-            false),
-          assert.deepEqual(cashbox.refundPayment({ amount: '100', info: 'Not a number' }),
-            false),
-          assert.deepEqual(cashbox.refundPayment({ amount: [100], info: 'Not a number' }),
-            false),
-          assert.deepEqual(cashbox.refundPayment({ amount: {}, info: 'Not a number' }),
-            false),
-          assert.deepEqual(cashbox.refundPayment({ info: 'amount is missing' }),
-            false)
+          false);
+        assert.deepEqual(cashbox.refundPayment({ amount: 100, info: 'cashbox.amount < 100' }),
+          false);
+        assert.deepEqual(cashbox.refundPayment({ amount: '100', info: 'Not a number' }),
+          false);
+        assert.deepEqual(cashbox.refundPayment({ amount: [100], info: 'Not a number' }),
+          false);
+        assert.deepEqual(cashbox.refundPayment({ amount: {}, info: 'Not a number' }),
+          false);
+        assert.deepEqual(cashbox.refundPayment({ info: 'amount is missing' }),
+          false);
         assert.deepEqual(cashbox.refundPayment({ amount: 100 }),
-            false),
-          assert.deepEqual(cashbox.refundPayment(NaN, 'Not an bject at all'),
-            false)
+          false);
+        assert.deepEqual(cashbox.refundPayment(NaN, 'Not an bject at all'),
+          false);
+        if (cashbox.status === 'closed') {
+          assert.deepEqual(cashbox.addPayment({ amount: 10, info: 'payment.amount = 0' }),
+            false);
+        }
       });
   });
 });
 
 mocha.run();
+/* jshint ignore:end */
