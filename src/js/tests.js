@@ -135,7 +135,6 @@ describe('Cashbox', function() {
       assert.deepEqual(cashbox.open(1), assert.propertyVal(cashbox, 'amount', 1),
         assert.propertyVal(cashbox, 'status', 'opened'));
     });
-    console.log(cashbox.status);
     it(
       'Возвращает false, если incomingCash меньше нуля или не является числом, если касса уже открыта',
       () => {
