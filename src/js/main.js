@@ -82,54 +82,69 @@ function check(data, expectedType) {
   return result;
 }
 
-var tracks = ['song1.mp3', 'song2.mp3', 'song3.mp3', 'song4.mp3', 'song5.mp3'];
-var Player = {
-  currentTrack: tracks[0],
-  status: 'pause',
-  display: function() {
-    return 'Track: ' + this.currentTrack + ' Status: ' + this.status;
-  },
-  play: function() {
-    this.status = 'play';
-  },
-  pause: function() {
-    this.status = 'pause';
-  },
-  next: function() {
-    if (this.currentTrack != tracks[tracks.length - 1]) {
-      this.currentTrack = tracks[tracks.indexOf(this.currentTrack) + 1];
-    } else {
-      this.currentTrack = tracks[0];
-    }
-  },
-  prev: function() {
-    if (this.currentTrack != tracks[0]) {
-      this.currentTrack = tracks[tracks.indexOf(this.currentTrack) - 1];
-    } else {
-      this.currentTrack = tracks[tracks.length - 1];
-    }
+function Player(tracklist) {
+  if (!tracklist) this.tracks = [];
+  if (tracklist && !Array.isArray(tracklist)) {
+    throw new Error('Invalid tracklist');
   }
-};
+  if (tracklist) {
+    for (var i = 0; i < tracklist.length; i++) {
+      if (typeof tracklist[i] !== 'string') {
+        throw new Error('Invalid tracklist');
+      }
+    }
+    this.tracks = tracklist;
+    this.currentTrack = tracklist[0]
+  }
+  this.status = 'pause';
+  this.display = function() {
+    if (this.tracks.length > 0) {
+      return 'Track: ' + this.currentTrack + ' Status: ' + this.status;
+    } else {
+      return 'Tracklist empty';
+    }
+  };
+  this.play = function() {
+    if (this.tracks.length > 0) this.status = 'play';
+  };
+  this.pause = function() {
+    if (this.tracks.length > 0) this.status = 'pause';
+  };
+  this.next = function() {
+    if (this.currentTrack !== this.tracks[this.tracks.length - 1]) {
+      this.currentTrack = this.tracks[this.tracks.indexOf(this.currentTrack) + 1];
+    } else {
+      this.currentTrack = this.tracks[0];
+    }
+  };
+  this.prev = function() {
+    if (this.currentTrack != this.tracks[0]) {
+      this.currentTrack = this.tracks[this.tracks.indexOf(this.currentTrack) - 1];
+    } else {
+      this.currentTrack = this.tracks[this.tracks.length - 1];
+    }
+  };
+}
 
-var cashbox = {
-  amount: 0,
-  history: [],
-  status: 'closed',
-  open: function(incomingCash) {
+function Cashbox() {
+  this.amount = 0;
+  this.history = [];
+  this.status = 'closed';
+  this.open = function(incomingCash) {
     if (incomingCash < 0 || typeof incomingCash !== 'number' || Number.isNaN(incomingCash) ||
       incomingCash === Infinity || this.status === 'opened')
       return false;
     this.amount = incomingCash;
     this.status = 'opened';
-  },
-  addPayment: function(payment) {
+  };
+  this.addPayment = function(payment) {
     if (typeof payment !== 'object' || typeof payment.amount !== 'number' || Number.isNaN(
         payment.amount) || payment.amount === Infinity || payment.amount <= 0 || typeof payment
       .info !== 'string' || payment.info.trim().length === 0 || this.status === 'closed') return false;
     this.amount += payment.amount;
     this.history.push({ time: new Date(), info: payment.info.trim(), amount: payment.amount });
-  },
-  refundPayment: function(refund) {
+  };
+  this.refundPayment = function(refund) {
     if (typeof refund !== 'object' || typeof refund.amount !== 'number' || Number.isNaN(
         refund.amount) || refund.amount === Infinity || refund.amount <= 0 || typeof refund
       .info !== 'string' || refund.info.trim().length === 0 || refund.amount > this.amount ||
@@ -137,5 +152,5 @@ var cashbox = {
       return false;
     this.amount -= refund.amount;
     this.history.push({ time: new Date(), info: refund.info.trim(), amount: refund.amount });
-  },
+  };
 };

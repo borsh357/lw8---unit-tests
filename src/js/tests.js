@@ -3,23 +3,26 @@ mocha.setup('bdd');
 var assert = chai.assert;
 var expect = chai.expect;
 
-describe('replaceString', function() {
-  it('Возвращает строку, в которой все искомые подстроки заменены на новую подстроку', () => {
-    assert.deepEqual(replaceString('Hello world!', 'world', 'people'), 'hello people!');
-    assert.deepEqual(replaceString('Hello world!', 'o', ''), 'hell wrld!');
-    assert.deepEqual(replaceString('Hello world!', ' ', ''), 'helloworld!');
-  });
-  it('Возвращает false при неверно переданных аргументах', () => {
-    assert.deepEqual(replaceString('Hello world!', '', ''), false);
-    assert.deepEqual(replaceString('Hello world!', 'hello'), false);
-    assert.deepEqual(replaceString('Hello world!', 'he', 1), false);
-    assert.deepEqual(replaceString('Hello world!', 'hell', [1, 2, 3]), false);
-    assert.deepEqual(replaceString('Hello world!', 'hello', ['wo', 'r', 'ld']), false);
-  });
-})
+describe(
+  'replaceString - Возвращает строку, в которой все искомые подстроки заменены на новую подстроку',
+  function() {
+    it('Возвращает корректную строку', () => {
+      assert.deepEqual(replaceString('Hello world!', 'world', 'people'), 'hello people!');
+      assert.deepEqual(replaceString('Hello world!', 'o', ''), 'hell wrld!');
+      assert.deepEqual(replaceString('Hello world!', ' ', ''), 'helloworld!');
+    });
+    it('Возвращает false при неверно переданных аргументах', () => {
+      assert.deepEqual(replaceString('Hello world!', '', ''), false);
+      assert.deepEqual(replaceString('Hello world!', 'hello'), false);
+      assert.deepEqual(replaceString('Hello world!', 'he', 1), false);
+      assert.deepEqual(replaceString('Hello world!', 'hell', [1, 2, 3]), false);
+      assert.deepEqual(replaceString('Hello world!', 'hello', ['wo', 'r', 'ld']), false);
+    });
+  })
 
-describe('isArrayEqual', function() {
-  it('Сравнивает два произвольных массива и возвращает true, если массивы равны', () => {
+//isArrayEqual
+describe('isArrayEqual - Сравнивает два произвольных массива', function() {
+  it('Возвращает true, если массивы равны', () => {
     assert.deepEqual(isArrayEqual([1, 2, 3], [1, 2, 3]), true);
     assert.deepEqual(isArrayEqual([1, 2, null], [1, 2, null]), true);
     assert.deepEqual(isArrayEqual([1, 2, false], [1, 2, false]), true);
@@ -32,203 +35,318 @@ describe('isArrayEqual', function() {
     assert.deepEqual(isArrayEqual([1, 'abc', undefined], [1, 'Hellowrld!', undefined]),
       false);
   });
+  it('Возвращает false, если переданы неверные значения(не массивы)', () => {
+    assert.deepEqual(isArrayEqual('false arguments'), false);
+  });
 })
 
-describe('flatArray', function() {
-  it(
-    'Принимает массив чисел, если в нем также содержатся массивы с числами, "разворачивает" их и возвращает массив с числами',
-    () => {
+//flatArray
+describe(
+  'flatArray - Принимает массив чисел, если в нем также содержатся массивы с числами, "разворачивает" их',
+  function() {
+    it('Возвращает массив с числами', () => {
       assert.deepEqual(flatArray([]), []);
       assert.deepEqual(flatArray(Array()), []);
       assert.deepEqual(flatArray([1, 2]), [1, 2]);
       assert.deepEqual(flatArray([1, [2, 3]]), [1, 2, 3]);
       assert.deepEqual(flatArray([1, [2, 3], 40, [80, 160], 999]), [1, 2, 3, 40, 80, 160, 999]);
     });
-  it('Возвращает false, если на вход получены неправильные значения', () => {
-    assert.deepEqual(flatArray(1), false);
-    assert.deepEqual(flatArray('abc'), false);
-    assert.deepEqual(flatArray({ 1: 1, 2: 2, 3: 3 }), false);
-    assert.deepEqual(flatArray(null), false);
-    assert.deepEqual(flatArray(undefined), false);
-    assert.deepEqual(flatArray(), false);
-  });
-})
+    it('Возвращает false, если на вход получены неправильные значения', () => {
+      assert.deepEqual(flatArray(1), false);
+      assert.deepEqual(flatArray('abc'), false);
+      assert.deepEqual(flatArray({ 1: 1, 2: 2, 3: 3 }), false);
+      assert.deepEqual(flatArray(null), false);
+      assert.deepEqual(flatArray(undefined), false);
+      assert.deepEqual(flatArray(), false);
+    });
+    it(
+      'Игнорирует глубину вложенности массивов более 1 (Напр: [1,[2,[3],4],5] - [3] проигнорируется)',
+      () => {
+        assert.deepEqual(flatArray([1, [2, [3], 4], 5]), [1, 2, 4, 5]);
+      });
+  })
 
+//isTimeRangesIntersect
 describe('isTimeRangesIntersect', function() {
-  it('Возвращает true, если временные диапазоны пересекаются', () => {
-    assert.deepEqual(isTimeRangesIntersect(['07:00', '08:01'], ['08:00', '09:00']), true);
-    assert.deepEqual(isTimeRangesIntersect(['08:00', '09:00'], ['07:00', '08:30']), true);
-  });
-  it(
-    'Возвращает false, если временные диапазоны не пересекаются или переданы неверные значения',
-    () => {
+    it('Возвращает true, если временные диапазоны пересекаются', () => {
+      assert.deepEqual(isTimeRangesIntersect(['07:00', '08:01'], ['08:00', '09:00']), true);
+      assert.deepEqual(isTimeRangesIntersect(['08:00', '09:00'], ['07:00', '08:30']), true);
+    });
+    it('Возвращает true, если временные диапазоны одинаковы (а значит пересекаются)', () => {
+      assert.deepEqual(isTimeRangesIntersect(['08:00', '09:00'], ['08:00', '09:00']), true);
+      assert.deepEqual(isTimeRangesIntersect(['00:00', '00:00'], ['00:00', '00:00']), true);
+    });
+    it('Возвращает false, если временные диапазоны не пересекаются', () => {
       assert.deepEqual(isTimeRangesIntersect(['08:00', '09:00'], ['07:00', '08:00']), false);
       assert.deepEqual(isTimeRangesIntersect(['08:00', '09:00'], ['07:00', '08:00']), false);
+    });
+    it('Возвращает false, если переданы неверные значения', () => {
       assert.deepEqual(isTimeRangesIntersect(['08:00'], ['07:00', '09:00']), false);
       assert.deepEqual(isTimeRangesIntersect(1, ['07:00', '08:00']), false);
       assert.deepEqual(isTimeRangesIntersect(undefined, undefined), false);
       assert.deepEqual(isTimeRangesIntersect(), false);
     });
-})
-
-describe('check', function() {
-  it('Проверяет данные data на соответствие типу expectedType', () => {
+  })
+  //check
+describe('check - Проверяет данные data на соответствие типу expectedType', function() {
+  it('Array', () => {
     assert.deepEqual(check([1, 2], 'array'), true);
+  });
+  it('String', () => {
     assert.deepEqual(check('Hello, world', 'string'), true);
-    assert.deepEqual(check(1, 'number'), true);
-    assert.deepEqual(check(Number(), 'number'), true);
+  });
+  it('Object', () => {
     assert.deepEqual(check({ 1: 'a' }, 'object'), true);
-    assert.deepEqual(check(NaN, 'number'), true);
+  });
+  it('Null', () => {
     assert.deepEqual(check(null, 'null'), true);
   });
-  it(
-    'Возвращает false, если data не соответствует expectedType или переданы неверные аргументы',
-    () => {
-      assert.deepEqual(check([1, 2], 'number'), false);
-      assert.deepEqual(check('Hello, world', 'array'), false);
-      assert.deepEqual(check(1, 'object'), false);
-      assert.deepEqual(check(Number(), 'undefined'), false);
-      assert.deepEqual(check({ 1: 'a' }, 'string'), false);
-      assert.deepEqual(check(1, ''), false);
-      assert.deepEqual(check(1), false);
-      assert.deepEqual(check(), false);
-    });
+  it('Number', () => {
+    assert.deepEqual(check(1, 'number'), true);
+    assert.deepEqual(check(Number(), 'number'), true);
+    assert.deepEqual(check(NaN, 'number'), true);
+  });
+  it('Возвращает false, если data не соответствует expectedType', () => {
+    assert.deepEqual(check([1, 2], 'number'), false);
+    assert.deepEqual(check('Hello, world', 'array'), false);
+    assert.deepEqual(check(1, 'object'), false);
+    assert.deepEqual(check(Number(), 'undefined'), false);
+    assert.deepEqual(check({ 1: 'a' }, 'string'), false);
+  });
+  it('Возвращает false, если переданы неверные аргументы', () => {
+    assert.deepEqual(check(1, ''), false);
+    assert.deepEqual(check(1), false);
+    assert.deepEqual(check(), false);
+  });
 })
 
+//player
 describe('Player', function() {
+  it('Принимает аргумент в качестве треклиста (отсутствие аргумента = пустой треклист)', () => {
+    assert.doesNotThrow(() => {
+      var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      assert.deepEqual(testPlayer.tracks, ['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      testPlayer = new Player();
+      assert.deepEqual(testPlayer.tracks, []);
+    });
+  });
+  it(
+    'Плеер не содается, если в качестве треклиста переданы не валидные значения (не массив строк)',
+    () => {
+      assert.throws(() => {
+        var testPlayer = new Player(1, 'song', undefined);
+      });
+    });
   describe('player.display()', function() {
-    it('Отображает текущее состояние объекта', () => {
-      assert.deepEqual(Player.display(), 'Track: ' + Player.currentTrack + ' Status: ' +
-        Player.status);
+    it('При наличии треков отображает текущее состояние плеера', () => {
+      var testPlayer1 = new Player(['song1.mp3']);
+      assert.deepEqual(testPlayer1.display(), 'Track: song1.mp3 Status: pause');
+    });
+    it('Отображает пустой треклист', () => {
+      var testPlayer2 = new Player();
+      assert.deepEqual(testPlayer2.display(), 'Tracklist empty');
     });
   });
   describe('player.play()', function() {
     it('Меняет статус проигрывателя на play', () => {
-      assert.deepEqual(Player.play(), assert.propertyVal(Player, 'status', 'play'))
+      var testPlayer = new Player(['song1.mp3']);
+      assert.deepEqual(testPlayer.play(), assert.propertyVal(testPlayer, 'status',
+        'play'));
+      assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: play');
+    });
+    it('Не меняет статус проигрывателя, если треклист пуст', () => {
+      var testPlayer = new Player();
+      assert.deepEqual(testPlayer.play(), assert.propertyVal(testPlayer, 'status',
+        'pause'));
+      assert.deepEqual(testPlayer.display(), 'Tracklist empty');
     });
   });
   describe('player.pause()', function() {
     it('Меняет статус проигрывателя на pause', () => {
-      assert.deepEqual(Player.pause(), assert.propertyVal(Player, 'status', 'pause'))
+      var testPlayer = new Player(['song1.mp3']);
+      testPlayer.play();
+      assert.deepEqual(testPlayer.pause(), assert.propertyVal(testPlayer, 'status',
+        'pause'));
+      assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: pause');
     });
   });
   describe('player.next()', function() {
     it('Переключает на следующий трек', () => {
-      var testCurrentTrack = Player.currentTrack;
-      expect(Player.next(), assert.propertyVal(Player, 'currentTrack', tracks[tracks.indexOf(
-        testCurrentTrack) + 1]))
+      var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      expect(testPlayer.next(), assert.propertyVal(testPlayer, 'currentTrack',
+        'song2.mp3'));
+      assert.deepEqual(testPlayer.display(), 'Track: song2.mp3 Status: pause');
+    });
+    it('Переключает на первый трек при достижении конца треклиста (loop)', () => {
+      var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      testPlayer.next();
+      testPlayer.next();
+      expect(testPlayer.next(), assert.propertyVal(testPlayer, 'currentTrack',
+        'song1.mp3'));
+      assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: pause');
+    });
+    it('Не делает ничего при пустом треклисте', () => {
+      var testPlayer = new Player();
+      expect(testPlayer.next(), assert.propertyVal(testPlayer, 'currentTrack',
+        undefined));
+      assert.deepEqual(testPlayer.display(), 'Tracklist empty');
     });
   });
   describe('player.prev()', function() {
-    var testCurrentTrack = Player.currentTrack;
-    it('Переключает на пердыдущий трек', () => {
-      expect(Player.prev(), assert.propertyVal(Player, 'currentTrack', tracks[tracks.indexOf(
-        testCurrentTrack) - 1]))
+    it('Переключает на предыдущий трек', () => {
+      var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      testPlayer.next();
+      expect(testPlayer.prev(), assert.propertyVal(testPlayer, 'currentTrack',
+        'song1.mp3'));
+      assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: pause');
+    });
+    it('Переключает на последний трек при достижении начала треклиста (loop)', () => {
+      var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      expect(testPlayer.prev(), assert.propertyVal(testPlayer, 'currentTrack',
+        'song3.mp3'));
+      assert.deepEqual(testPlayer.display(), 'Track: song3.mp3 Status: pause');
+    });
+    it('Не делает ничего при пустом треклисте', () => {
+      var testPlayer = new Player();
+      expect(testPlayer.prev(), assert.propertyVal(testPlayer, 'currentTrack',
+        undefined));
+      assert.deepEqual(testPlayer.display(), 'Tracklist empty');
     });
   });
 });
 
 
-describe('Cashbox', function() {
-  describe('cashbox.open(incomingCash)', function() {
-    it('Принимает аргумент в качестве amount кассы', () => {
-      assert.deepEqual(cashbox.open(1), assert.propertyVal(cashbox, 'amount', 1),
-        assert.propertyVal(cashbox, 'status', 'opened'));
-    });
-    it(
-      'Возвращает false, если incomingCash меньше нуля или не является числом, если касса уже открыта',
-      () => {
-        assert.deepEqual(cashbox.open(-1), false);
-        assert.deepEqual(cashbox.open(NaN), false);
-        assert.deepEqual(cashbox.open(Infinity), false);
-        assert.deepEqual(cashbox.open('1'), false);
-        assert.deepEqual(cashbox.open([1]), false);
-        assert.deepEqual(cashbox.open({ amount: 1 }), false);
-        assert.deepEqual(cashbox.open(), false);
-        if (cashbox.status === 'opened') {
-          assert.deepEqual(cashbox.open(100), false);
-        }
+describe('Cashbox - Объект кассы', function() {
+  describe(
+    'cashbox.open(incomingCash) - Принимает аргумент в качестве amount кассы и открывает ее',
+    function() {
+      it('Касса открылась, amount изменился', () => {
+        var testCashbox = new Cashbox();
+        assert.deepEqual(testCashbox.open(1), assert.propertyVal(testCashbox, 'amount', 1),
+          assert.propertyVal(testCashbox, 'status', 'opened'));
       });
-  });
+      it('Возвращает false, если incomingCash меньше нуля', () => {
+        var testCashbox = new Cashbox();
+        assert.deepEqual(testCashbox.open(-1), false);
+      });
+      it('Возвращает false, если incomingCash не является числом', () => {
+        var testCashbox = new Cashbox();
+        assert.deepEqual(testCashbox.open(NaN), false);
+        assert.deepEqual(testCashbox.open(Infinity), false);
+        assert.deepEqual(testCashbox.open('1'), false);
+        assert.deepEqual(testCashbox.open([1]), false);
+        assert.deepEqual(testCashbox.open({ amount: 1 }), false);
+        assert.deepEqual(testCashbox.open(), false);
+      });
+      it('Возвращает false, если касса уже открыта', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(100);
+        assert.deepEqual(testCashbox.open(100), false);
+      });
+    });
 
-  describe('cashbox.addPayment()', function() {
-    it('Добавляет payment в history, изменят amount cashbox\'a', () => {
-      var testCashboxAmount = cashbox.amount;
-      var testIndexOfPayment;
-      assert.deepEqual(
-        cashbox.addPayment({ amount: 10, info: 'True Payment' }),
-        assert.propertyVal(cashbox, 'amount', testCashboxAmount + 10),
-        testIndexOfPayment = cashbox.history.length - 1,
-        expect(cashbox.history[testIndexOfPayment].info).to.be.deep.equal(
-          'True Payment'),
-        expect(cashbox.history[testIndexOfPayment].amount).to.be.deep.equal(10),
-        expect(cashbox.history[testIndexOfPayment]).to.have.property('time'),
-        expect(assert.propertyVal(cashbox, 'status', 'opened'))
-      );
-    });
-    it(
-      'Возвращает false, если payment.ammount меньше или равно нулю, если переданы значения неверного типа, аргументы отсутствуют, или касса закрыта',
-      () => {
-        assert.deepEqual(cashbox.addPayment({ amount: 0, info: 'payment.amount = 0' }),
-          false);
-        assert.deepEqual(cashbox.addPayment({ amount: '100', info: 'Not a number' }),
-          false);
-        assert.deepEqual(cashbox.addPayment({ amount: [100], info: 'Not a number' }),
-          false);
-        assert.deepEqual(cashbox.addPayment({ amount: {}, info: 'Not a number' }),
-          false);
-        assert.deepEqual(cashbox.addPayment({ info: 'amount is missing' }),
-          false);
-        assert.deepEqual(cashbox.addPayment({ amount: 100 }),
-          false);
-        assert.deepEqual(cashbox.addPayment(NaN, 'not an object at all'),
-          false);
-        if (cashbox.status === 'closed') {
-          assert.deepEqual(cashbox.addPayment({ amount: 10, info: 'payment.amount = 0' }),
-            false);
-        }
+  describe('cashbox.addPayment() - Добавляет payment в history, изменяет amount cashbox\'a',
+    function() {
+      it('Payment добавлен в history, amount изменился', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(0);
+        assert.deepEqual(
+          testCashbox.addPayment({ amount: 10, info: 'True Payment' }),
+          assert.propertyVal(testCashbox, 'amount', 10),
+          expect(testCashbox.history[0].info).to.be.deep.equal(
+            'True Payment'),
+          expect(testCashbox.history[0].amount).to.be.deep.equal(10),
+          expect(testCashbox.history[0]).to.have.property('time'),
+          expect(assert.propertyVal(testCashbox, 'status', 'opened'))
+        );
       });
-  });
+      it('Возвращает false, если payment.ammount меньше или равно нулю', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(0);
+        assert.deepEqual(testCashbox.addPayment({ amount: 0, info: 'payment.amount = 0' }),
+          false);
+        assert.deepEqual(testCashbox.addPayment({ amount: -100, info: 'payment.amount < 0' }),
+          false);
+        expect(testCashbox.history).to.be.empty;
+      });
+      it('Возвращает false, если переданы значения неверного типа (не объект)', () => {
+        var testCashbox = new Cashbox();
+        assert.deepEqual(testCashbox.addPayment({ amount: '100', info: 'Not a number' }),
+          false);
+        assert.deepEqual(testCashbox.addPayment({ amount: [100], info: 'Not a number' }),
+          false);
+        assert.deepEqual(testCashbox.addPayment({ amount: {}, info: 'Not a number' }),
+          false);
+        assert.deepEqual(testCashbox.addPayment({ info: 'amount is missing' }),
+          false);
+        assert.deepEqual(testCashbox.addPayment({ amount: 100 }),
+          false);
+        assert.deepEqual(testCashbox.addPayment(NaN, 'not an object at all'),
+          false);
+        expect(testCashbox.history).to.be.empty;
+      });
+      it('Возвращает false, если касса закрыта', () => {
+        var testCashbox = new Cashbox();
+        assert.deepEqual(testCashbox.addPayment({ amount: 10, info: 'cashbox closed' }),
+          false);
+      });
+    });
 
-  describe('cashbox.refundPayment()', function() {
-    it('Добавляет refund в history, изменят amount cashbox\'a', () => {
-      var testCashboxAmount = cashbox.amount;
-      var testIndexOfPayment;
-      assert.deepEqual(
-        cashbox.refundPayment({ amount: 5, info: 'True Refund' }),
-        assert.propertyVal(cashbox, 'amount', testCashboxAmount - 5),
-        testIndexOfPayment = cashbox.history.length - 1,
-        expect(cashbox.history[testIndexOfPayment].info).to.be.deep.equal(
-          'True Refund'),
-        expect(cashbox.history[testIndexOfPayment].amount).to.be.deep.equal(5),
-        expect(cashbox.history[testIndexOfPayment]).to.have.property('time'),
-        expect(assert.propertyVal(cashbox, 'status', 'opened'))
-      );
-    });
-    it(
-      'Возвращает false, если refund.ammount меньше или равно нулю или больше refund.ammount, если переданы значения неверного типа, или если аргументы отсутствуют',
-      () => {
-        assert.deepEqual(cashbox.refundPayment({ amount: 0, info: 'refund.amount = 0' }),
-          false);
-        assert.deepEqual(cashbox.refundPayment({ amount: 100, info: 'cashbox.amount < 100' }),
-          false);
-        assert.deepEqual(cashbox.refundPayment({ amount: '100', info: 'Not a number' }),
-          false);
-        assert.deepEqual(cashbox.refundPayment({ amount: [100], info: 'Not a number' }),
-          false);
-        assert.deepEqual(cashbox.refundPayment({ amount: {}, info: 'Not a number' }),
-          false);
-        assert.deepEqual(cashbox.refundPayment({ info: 'amount is missing' }),
-          false);
-        assert.deepEqual(cashbox.refundPayment({ amount: 100 }),
-          false);
-        assert.deepEqual(cashbox.refundPayment(NaN, 'Not an bject at all'),
-          false);
-        if (cashbox.status === 'closed') {
-          assert.deepEqual(cashbox.addPayment({ amount: 10, info: 'payment.amount = 0' }),
-            false);
-        }
+  describe('cashbox.refundPayment() - Добавляет refund в history, изменят amount cashbox\'a',
+    function() {
+      it('Refund добавлен в history, amount изменился', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(15);
+        assert.deepEqual(
+          testCashbox.refundPayment({ amount: 5, info: 'True Refund' }),
+          assert.propertyVal(testCashbox, 'amount', 10),
+          expect(testCashbox.history[0].info).to.be.deep.equal(
+            'True Refund'),
+          expect(testCashbox.history[0].amount).to.be.deep.equal(5),
+          expect(testCashbox.history[0]).to.have.property('time'),
+          expect(assert.propertyVal(testCashbox, 'status', 'opened'))
+        );
       });
+      it('Возвращает false, если refund.ammount меньше или равно нулю', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(15);
+        assert.deepEqual(testCashbox.refundPayment({ amount: 0, info: 'refund.amount = 0' }),
+          false);
+        assert.deepEqual(testCashbox.refundPayment({ amount: -100, info: 'refund.amount = 0' }),
+          false);
+      });
+      it('Возвращает false, если переданы значения неверного типа (не объект)', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(15);
+        assert.deepEqual(testCashbox.refundPayment({ amount: 100, info: 'cashbox.amount < 100' }),
+          false);
+        assert.deepEqual(testCashbox.refundPayment({ amount: '100', info: 'Not a number' }),
+          false);
+        assert.deepEqual(testCashbox.refundPayment({ amount: [100], info: 'Not a number' }),
+          false);
+        assert.deepEqual(testCashbox.refundPayment({ amount: {}, info: 'Not a number' }),
+          false);
+        assert.deepEqual(testCashbox.refundPayment({ info: 'amount is missing' }),
+          false);
+        assert.deepEqual(testCashbox.refundPayment({ amount: 100 }),
+          false);
+        assert.deepEqual(testCashbox.refundPayment(NaN, 'Not an bject at all'),
+          false);
+      });
+      it('Возвращает false, если касса закрыта', () => {
+        var testCashbox = new Cashbox();
+        assert.deepEqual(testCashbox.addPayment({ amount: 10, info: 'cashbox closed' }),
+          false);
+      });
+    });
+  it('Количество записей в history соответствует количеству пейментов и рефандов', () => {
+    var testCashbox = new Cashbox();
+    testCashbox.open(100);
+    testCashbox.addPayment({ amount: 1, info: 'history-1' });
+    testCashbox.addPayment({ amount: 2, info: 'history-2' });
+    testCashbox.refundPayment({ amount: 2, info: 'history-3' });
+    testCashbox.refundPayment({ amount: 1, info: 'history-4' });
+    expect(testCashbox.history).to.have.lengthOf(4);
   });
 });
 
