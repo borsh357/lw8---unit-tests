@@ -339,15 +339,30 @@ describe('Cashbox - Объект кассы', function() {
           false);
       });
     });
-  it('Количество записей в history соответствует количеству пейментов и рефандов', () => {
-    var testCashbox = new Cashbox();
-    testCashbox.open(100);
-    testCashbox.addPayment({ amount: 1, info: 'history-1' });
-    testCashbox.addPayment({ amount: 2, info: 'history-2' });
-    testCashbox.refundPayment({ amount: 2, info: 'history-3' });
-    testCashbox.refundPayment({ amount: 1, info: 'history-4' });
-    expect(testCashbox.history).to.have.lengthOf(4);
-  });
+  describe('cashbox.history - хранит информацию о пейментах и рефандах',
+    function() {
+      it('Количество записей в history соответствует количеству пейментов и рефандов', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(100);
+        testCashbox.addPayment({ amount: 1, info: 'history-1' });
+        testCashbox.addPayment({ amount: 2, info: 'history-2' });
+        testCashbox.refundPayment({ amount: 2, info: 'history-3' });
+        testCashbox.refundPayment({ amount: 1, info: 'history-4' });
+        expect(testCashbox.history).to.have.lengthOf(4);
+      });
+      it('Порядок записей в history соответствует порядку вызова методов', () => {
+        var testCashbox = new Cashbox();
+        testCashbox.open(100);
+        testCashbox.addPayment({ amount: 1, info: 'history-1' });
+        testCashbox.addPayment({ amount: 2, info: 'history-2' });
+        testCashbox.refundPayment({ amount: 2, info: 'history-3' });
+        testCashbox.refundPayment({ amount: 1, info: 'history-4' });
+        assert.deepEqual(testCashbox.history[0].info, 'history-1');
+        assert.deepEqual(testCashbox.history[1].info, 'history-2');
+        assert.deepEqual(testCashbox.history[2].info, 'history-3');
+        assert.deepEqual(testCashbox.history[3].info, 'history-4');
+      });
+    })
 });
 
 mocha.run();

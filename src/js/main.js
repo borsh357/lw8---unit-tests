@@ -94,7 +94,7 @@ function Player(tracklist) {
       }
     }
     this.tracks = tracklist;
-    this.currentTrack = tracklist[0]
+    this.currentTrack = tracklist[0];
   }
   this.status = 'pause';
   this.display = function() {
@@ -148,9 +148,8 @@ function Cashbox() {
     if (typeof refund !== 'object' || typeof refund.amount !== 'number' || Number.isNaN(
         refund.amount) || refund.amount === Infinity || refund.amount <= 0 || typeof refund
       .info !== 'string' || refund.info.trim().length === 0 || refund.amount > this.amount ||
-      this.status === 'closed')
-      return false;
+      this.status === 'closed') return false;
     this.amount -= refund.amount;
     this.history.push({ time: new Date(), info: refund.info.trim(), amount: refund.amount });
   };
-};
+}
