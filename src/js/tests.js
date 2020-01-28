@@ -17,6 +17,7 @@ describe(
       assert.deepEqual(replaceString('Hello world!', 'he', 1), false);
       assert.deepEqual(replaceString('Hello world!', 'hell', [1, 2, 3]), false);
       assert.deepEqual(replaceString('Hello world!', 'hello', ['wo', 'r', 'ld']), false);
+      assert.deepEqual(replaceString({}, 'hello', ['wo', 'r', 'ld']), false);
     });
   })
 
@@ -150,12 +151,14 @@ describe('Player', function() {
   describe('player.play()', function() {
     it('Меняет статус проигрывателя на play', () => {
       var testPlayer = new Player(['song1.mp3']);
+      assert.deepEqual(testPlayer.status, 'pause');
       assert.deepEqual(testPlayer.play(), assert.propertyVal(testPlayer, 'status',
         'play'));
       assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: play');
     });
     it('Не меняет статус проигрывателя, если треклист пуст', () => {
       var testPlayer = new Player();
+      assert.deepEqual(testPlayer.status, 'pause');
       assert.deepEqual(testPlayer.play(), assert.propertyVal(testPlayer, 'status',
         'pause'));
       assert.deepEqual(testPlayer.display(), 'Tracklist empty');
@@ -164,7 +167,9 @@ describe('Player', function() {
   describe('player.pause()', function() {
     it('Меняет статус проигрывателя на pause', () => {
       var testPlayer = new Player(['song1.mp3']);
+      assert.deepEqual(testPlayer.status, 'pause');
       testPlayer.play();
+      assert.deepEqual(testPlayer.status, 'play');
       assert.deepEqual(testPlayer.pause(), assert.propertyVal(testPlayer, 'status',
         'pause'));
       assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: pause');
@@ -173,14 +178,17 @@ describe('Player', function() {
   describe('player.next()', function() {
     it('Переключает на следующий трек', () => {
       var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      assert.propertyVal(testPlayer, 'currentTrack', 'song1.mp3');
       expect(testPlayer.next(), assert.propertyVal(testPlayer, 'currentTrack',
         'song2.mp3'));
       assert.deepEqual(testPlayer.display(), 'Track: song2.mp3 Status: pause');
     });
     it('Переключает на первый трек при достижении конца треклиста (loop)', () => {
       var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      assert.propertyVal(testPlayer, 'currentTrack', 'song1.mp3');
       testPlayer.next();
       testPlayer.next();
+      assert.propertyVal(testPlayer, 'currentTrack', 'song3.mp3');
       expect(testPlayer.next(), assert.propertyVal(testPlayer, 'currentTrack',
         'song1.mp3'));
       assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: pause');
@@ -195,13 +203,16 @@ describe('Player', function() {
   describe('player.prev()', function() {
     it('Переключает на предыдущий трек', () => {
       var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      assert.propertyVal(testPlayer, 'currentTrack', 'song1.mp3');
       testPlayer.next();
+      assert.propertyVal(testPlayer, 'currentTrack', 'song2.mp3');
       expect(testPlayer.prev(), assert.propertyVal(testPlayer, 'currentTrack',
         'song1.mp3'));
       assert.deepEqual(testPlayer.display(), 'Track: song1.mp3 Status: pause');
     });
     it('Переключает на последний трек при достижении начала треклиста (loop)', () => {
       var testPlayer = new Player(['song1.mp3', 'song2.mp3', 'song3.mp3']);
+      assert.propertyVal(testPlayer, 'currentTrack', 'song1.mp3');
       expect(testPlayer.prev(), assert.propertyVal(testPlayer, 'currentTrack',
         'song3.mp3'));
       assert.deepEqual(testPlayer.display(), 'Track: song3.mp3 Status: pause');
@@ -222,12 +233,14 @@ describe('Cashbox - Объект кассы', function() {
     function() {
       it('Касса открылась, amount изменился', () => {
         var testCashbox = new Cashbox();
+        assert.propertyVal(testCashbox, 'status', 'closed');
         assert.deepEqual(testCashbox.open(1), assert.propertyVal(testCashbox, 'amount', 1),
           assert.propertyVal(testCashbox, 'status', 'opened'));
       });
       it('Возвращает false, если incomingCash меньше нуля', () => {
         var testCashbox = new Cashbox();
         assert.deepEqual(testCashbox.open(-1), false);
+        assert.propertyVal(testCashbox, 'status', 'closed');
       });
       it('Возвращает false, если incomingCash не является числом', () => {
         var testCashbox = new Cashbox();
@@ -237,11 +250,14 @@ describe('Cashbox - Объект кассы', function() {
         assert.deepEqual(testCashbox.open([1]), false);
         assert.deepEqual(testCashbox.open({ amount: 1 }), false);
         assert.deepEqual(testCashbox.open(), false);
+        assert.propertyVal(testCashbox, 'status', 'closed');
       });
       it('Возвращает false, если касса уже открыта', () => {
         var testCashbox = new Cashbox();
+        assert.propertyVal(testCashbox, 'status', 'closed');
         testCashbox.open(100);
         assert.deepEqual(testCashbox.open(100), false);
+        assert.propertyVal(testCashbox, 'status', 'opened');
       });
     });
 
