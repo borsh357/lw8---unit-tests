@@ -12,12 +12,10 @@ describe(
       assert.deepEqual(replaceString('Hello world!', ' ', ''), 'helloworld!');
     });
     it('Возвращает false при неверно переданных аргументах', () => {
-      assert.deepEqual(replaceString('Hello world!', '', ''), false);
-      assert.deepEqual(replaceString('Hello world!', 'hello'), false);
-      assert.deepEqual(replaceString('Hello world!', 'he', 1), false);
-      assert.deepEqual(replaceString('Hello world!', 'hell', [1, 2, 3]), false);
-      assert.deepEqual(replaceString('Hello world!', 'hello', ['wo', 'r', 'ld']), false);
-      assert.deepEqual(replaceString({}, 'hello', ['wo', 'r', 'ld']), false);
+      assert.deepEqual(replaceString({ 1: 'wrong' }, 'good', 'good'), false);
+      assert.deepEqual(replaceString('good', ['wrong'], 'good'), false);
+      assert.deepEqual(replaceString('good', 'good', 1), false);
+      assert.deepEqual(replaceString('last two params are empty', '', ''), false);
     });
   })
 

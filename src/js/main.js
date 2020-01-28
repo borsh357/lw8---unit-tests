@@ -1,5 +1,6 @@
 function replaceString(text, searchStr, newStr) {
-  if (!text || !searchStr || typeof newStr !== 'string') {
+  if (!text || !searchStr || typeof newStr !== 'string' || typeof text !== 'string' || typeof searchStr !==
+    'string') {
     return false;
   }
   text = text.toLowerCase();
